@@ -2,6 +2,10 @@
 cd /tmp
 DEBIAN_FRONTEND=noninteractive
 
+echo "Install tools"
+apt-get update >/dev/null
+apt-get install -y vim pwgen jq wget curl unzip software-properties-common gpg gettext
+
 echo "Install kubectl"
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl >/dev/null
 chmod +x /tmp/kubectl
@@ -45,10 +49,6 @@ HELM_TMP_BIN="$HELM_TMP/$OS-$ARCH/helm"
 echo "Preparing to install helm into ${HELM_INSTALL_DIR}"
 cp "$HELM_TMP_BIN" "$HELM_INSTALL_DIR"
 echo "helm installed into $HELM_INSTALL_DIR/helm"
-
-echo "Install tools"
-apt-get update >/dev/null
-apt-get install -y vim pwgen jq wget curl unzip software-properties-common gpg gettext
 
 echo "Install Packer"
 latest_release_url="https://github.com/hashicorp/packer/releases"

@@ -110,8 +110,8 @@ chmod +x /usr/local/bin/docker-compose
 apt-get install -y python3-docker
 
 echo "Install Ansible and ansible-modules-hashivault"
-apt-get install -y --no-install-recommends python3-pip python3-venv
-pip3 install --no-cache-dir ansible ansible-modules-hashivault ansible-test ansble-tower-cli
+apt-get install -y --no-install-recommends python3-pip python3-venv twine
+pip3 install --no-cache-dir ansible ansible-modules-hashivault ansible-test tox virtualenv twine
 
 echo "Cleaning"
 rm -rf /var/lib/apt/lists/* /tmp/*

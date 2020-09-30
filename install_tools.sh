@@ -92,7 +92,7 @@ chmod 755 /usr/local/bin/jfrog
 
 echo "Install Ansible and ansible-modules-hashivault"
 apt-get install -y --no-install-recommends python3-pip python3-venv twine python3-docker
-pip3 install --no-cache-dir ansible ansible-modules-hashivault ansible-test tox virtualenv twine passlib
+pip3 install --no-cache-dir ansible ansible-modules-hashivault ansible-test tox virtualenv twine passlib ansible-lint
 
 echo "Cleaning"
 rm -rf /var/lib/apt/lists/* /tmp/*

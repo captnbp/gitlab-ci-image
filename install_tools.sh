@@ -87,13 +87,16 @@ TAG=$(curl -Ls $latest_release_url | grep 'href="/hadolint/hadolint/releases/tag
 wget "https://github.com/hadolint/hadolint/releases/download/${TAG}/hadolint-Linux-x86_64" -O /usr/local/bin/hadolint >/dev/null
 chmod 755 /usr/local/bin/hadolint
 
-echo "Install Jfrog CLI"
-wget https://api.bintray.com/content/jfrog/jfrog-cli-go/\$latest/jfrog-cli-linux-amd64/jfrog?bt_package=jfrog-cli-linux-amd64 -O /usr/local/bin/jfrog
-chmod 755 /usr/local/bin/jfrog
+#echo "Install Jfrog CLI"
+#wget https://api.bintray.com/content/jfrog/jfrog-cli-go/\$latest/jfrog-cli-linux-amd64/jfrog?bt_package=jfrog-cli-linux-amd64 -O /usr/local/bin/jfrog
+#chmod 755 /usr/local/bin/jfrog
 
 echo "Install Ansible and ansible-modules-hashivault"
 apt-get install -y --no-install-recommends python3-pip python3-venv twine python3-docker
 pip3 install --no-cache-dir ansible ansible-modules-hashivault ansible-test tox virtualenv twine passlib ansible-lint
+
+wget https://gitlab.com/gitlab-org/terraform-images/-/raw/master/src/bin/gitlab-terraform.sh -O /usr/bin/gitlab-terraform
+chmod +x /usr/bin/gitlab-terraform
 
 echo "Cleaning"
 rm -rf /var/lib/apt/lists/* /tmp/*

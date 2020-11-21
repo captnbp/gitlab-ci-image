@@ -5,7 +5,7 @@ DEBIAN_FRONTEND=noninteractive
 
 echo "Install tools"
 apt-get update >/dev/null
-apt-get install -y --no-install-recommends vim pwgen jq wget curl unzip software-properties-common gpg gettext ca-certificates
+apt-get install -y --no-install-recommends vim pwgen jq wget curl unzip software-properties-common gpg gettext ca-certificates openssh-client
 
 echo "Install kubectl"
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl >/dev/null

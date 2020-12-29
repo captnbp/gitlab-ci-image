@@ -1,6 +1,6 @@
 FROM golang:1.14 AS tfplantool
 
-ENV BASE="hashicorp/terraform:0.13.5"
+ENV BASE="hashicorp/terraform:0.14.1"
 ENV TFPLANTOOL="v0.1.0"
 
 WORKDIR /tfplantool

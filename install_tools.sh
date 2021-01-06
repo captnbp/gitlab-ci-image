@@ -98,7 +98,7 @@ chmod 755 /usr/local/bin/hadolint
 #chmod 755 /usr/local/bin/jfrog
 
 echo "Install Ansible and ansible-modules-hashivault"
-apt-get install -y --no-install-recommends python3-pip python3-venv twine python3-docker
+apt-get install -y --no-install-recommends python3-pip python3-venv twine python3-docker python3-psycopg2 postgresql-client-12
 pip3 install --no-cache-dir ansible ansible-modules-hashivault ansible-test tox virtualenv twine passlib ansible-lint
 
 wget https://gitlab.com/gitlab-org/terraform-images/-/raw/master/src/bin/gitlab-terraform.sh -O /usr/bin/gitlab-terraform

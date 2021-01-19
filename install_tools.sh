@@ -5,7 +5,7 @@ DEBIAN_FRONTEND=noninteractive
 
 echo "Install tools"
 apt-get update >/dev/null
-apt-get install -y --no-install-recommends vim pwgen jq wget curl unzip software-properties-common gpg gettext ca-certificates openssh-client
+apt-get install -y --no-install-recommends vim pwgen jq wget curl unzip software-properties-common gpg gettext ca-certificates openssh-client git bzip2
 
 echo "Install kubectl"
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl >/dev/null
@@ -81,6 +81,14 @@ echo "Install Minio mc client"
 wget "https://dl.min.io/client/mc/release/linux-amd64/mc" -O /usr/local/bin/mc >/dev/null
 chmod 755 /usr/local/bin/mc
 
+echo "Install Restic cli"
+latest_release_url="https://github.com/restic/restic/releases/"
+TAG=$(curl -Ls $latest_release_url | grep 'href="/restic/restic/releases/tag/v.' | grep -v beta | grep -v rc | head -n 1 | cut -d '"' -f 2 | awk '{n=split($NF,a,"/");print a[n]}' | awk 'a !~ $0{print}; {a=$0}' | cut -d 'v' -f2)
+wget "https://github.com/restic/restic/releases/download/v${TAG}/restic_${TAG}_linux_amd64.bz2" -O /tmp/restic.bz2 >/dev/null
+bzip2 -d /tmp/restic.bz2
+mv /tmp/restic /usr/local/bin/restic
+chmod 755 /usr/local/bin/restic
+
 echo "Install Scaleway scw cli"
 latest_release_url="https://github.com/scaleway/scaleway-cli/releases/"
 TAG=$(curl -Ls $latest_release_url | grep 'href="/scaleway/scaleway-cli/releases/tag/v.' | grep -v beta | grep -v rc | head -n 1 | cut -d '"' -f 2 | awk '{n=split($NF,a,"/");print a[n]}' | awk 'a !~ $0{print}; {a=$0}' | cut -d 'v' -f2)
@@ -92,10 +100,6 @@ latest_release_url="https://github.com/hadolint/hadolint/releases"
 TAG=$(curl -Ls $latest_release_url | grep 'href="/hadolint/hadolint/releases/tag/v.' | grep -v rc | head -n 1 | cut -d '"' -f 2 | awk '{n=split($NF,a,"/");print a[n]}' | awk 'a !~ $0{print}; {a=$0}')
 wget "https://github.com/hadolint/hadolint/releases/download/${TAG}/hadolint-Linux-x86_64" -O /usr/local/bin/hadolint >/dev/null
 chmod 755 /usr/local/bin/hadolint
-
-#echo "Install Jfrog CLI"
-#wget https://api.bintray.com/content/jfrog/jfrog-cli-go/\$latest/jfrog-cli-linux-amd64/jfrog?bt_package=jfrog-cli-linux-amd64 -O /usr/local/bin/jfrog
-#chmod 755 /usr/local/bin/jfrog
 
 echo "Install Ansible and ansible-modules-hashivault"
 apt-get install -y --no-install-recommends python3-pip python3-venv twine python3-docker python3-psycopg2 postgresql-client-12

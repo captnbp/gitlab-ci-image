@@ -91,7 +91,8 @@ chmod 755 /usr/local/bin/restic
 
 echo "Install Scaleway scw cli"
 latest_release_url="https://github.com/scaleway/scaleway-cli/releases/"
-TAG=$(curl -Ls $latest_release_url | grep 'href="/scaleway/scaleway-cli/releases/tag/v.' | grep -v beta | grep -v rc | head -n 1 | cut -d '"' -f 2 | awk '{n=split($NF,a,"/");print a[n]}' | awk 'a !~ $0{print}; {a=$0}' | cut -d 'v' -f2)
+#TAG=$(curl -Ls $latest_release_url | grep 'href="/scaleway/scaleway-cli/releases/tag/v.' | grep -v beta | grep -v rc | head -n 1 | cut -d '"' -f 2 | awk '{n=split($NF,a,"/");print a[n]}' | awk 'a !~ $0{print}; {a=$0}' | cut -d 'v' -f2)
+TAG=2.2.3
 wget "https://github.com/scaleway/scaleway-cli/releases/download/v${TAG}/scw-${TAG}-linux-x86_64" -O /usr/local/bin/scw >/dev/null
 chmod 755 /usr/local/bin/scw
 

@@ -12,6 +12,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o tfplantool .
 
 FROM    ubuntu:20.04
 
+ENV DEBIAN_FRONTEND noninteractive 
+
 COPY	--from=tfplantool /tfplantool/tfplantool /usr/bin/tfplantool
 
 COPY    ./install_tools.sh /usr/local/bin/install_tools.sh

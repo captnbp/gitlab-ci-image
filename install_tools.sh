@@ -115,14 +115,14 @@ chmod +x /usr/local/bin/cosign
 echo "Install dive"
 export DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
 curl -OL https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb
-sudo apt install ./dive_${DIVE_VERSION}_linux_amd64.deb
+apt install ./dive_${DIVE_VERSION}_linux_amd64.deb
 
 echo "Install oras"
 export ORAS_VERSION=$(curl https://api.github.com/repos/oras-project/oras/releases/latest | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
 curl -LO "https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz"
 mkdir -p oras-install/
 tar -zxf oras_${ORAS_VERSION}_*.tar.gz -C oras-install/
-sudo mv oras-install/oras /usr/local/bin/
+mv oras-install/oras /usr/local/bin/
 rm -rf oras_${ORAS_VERSION}_*.tar.gz oras-install/
 
 echo "Install Ansible and ansible-modules-hashivault"

@@ -8,11 +8,11 @@ variables:
 
 include:
   - project: doca/gitlab-ci-lib
-    file: container/build.yml
+    file: container/build.yaml
   - project: doca/gitlab-ci-lib
-    file: container/sign.yml
+    file: container/sign.yaml
   - project: doca/gitlab-ci-lib
-    file: container/test.yml
+    file: container/test.yaml
 
 before_script:
   - |

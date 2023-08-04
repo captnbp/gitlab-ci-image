@@ -12,19 +12,6 @@ include:
   - project: doca/gitlab-ci-lib
     file: container/test.yaml
 
-before_script:
-  - |
-      if [[ -z "${CI_COMMIT_TAG}" ]]; then
-        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}
-        export CI_APPLICATION_TAG=${CI_COMMIT_REF_SLUG}-${CI_APPLICATION_TAG:-$CI_COMMIT_SHA}
-      else
-        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}
-        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
-      fi
-      export CI_IMAGE=${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}
-      export CS_IMAGE=${CI_IMAGE}
-      echo "Destination image ${CI_IMAGE}"
-
 lint-dockerfile:
   extends: .tpl:container:test:hadolint
 

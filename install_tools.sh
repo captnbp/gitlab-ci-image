@@ -141,7 +141,7 @@ git clone --depth 1 https://github.com/drwetter/testssl.sh.git /usr/local/testss
 chmod 0755 /usr/local/testssl.sh
 
 echo "Install Ansible and ansible-modules-hashivault"
-apt-get install -y --no-install-recommends python3-pip python3-venv twine python3-docker python3-psycopg2 postgresql-client-14
+apt-get install -y --no-install-recommends python3-pip python3-venv twine python3-docker python3-psycopg2 postgresql-client-15
 pip3 install --no-cache-dir ansible ansible-modules-hashivault tox virtualenv twine passlib ansible-lint checkov opensearch-py
 
 echo "Install NodeJS and NPM"

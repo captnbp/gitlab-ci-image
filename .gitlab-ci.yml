@@ -4,9 +4,6 @@ stages:
   - scan
   - sign
 
-variables:
-  IMAGE_NAME: "gitlab-ci-image"
-
 include:
   - project: doca/gitlab-ci-lib
     file: container/build.yaml

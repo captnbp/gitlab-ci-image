@@ -4,12 +4,21 @@ stages:
   - scan
   - sign
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 include:
   - project: doca/gitlab-ci-lib
+    ref: main
     file: container/build.yaml
   - project: doca/gitlab-ci-lib
+    ref: main
     file: container/sign.yaml
   - project: doca/gitlab-ci-lib
+    ref: main
     file: container/test.yaml
 
 lint-dockerfile:
@@ -34,3 +43,14 @@ attest:
   extends: .tpl:container:sign:attest-image
   needs:
     - docker-build
+
+mr-note:
+  extends: .tpl:container:test:mr-note
+  needs:
+    - docker-build
+
+merge-manifest:
+  extends: .tpl:container:build:merge_manifests
+  needs:
+    - job: docker-build
+      artifacts: false

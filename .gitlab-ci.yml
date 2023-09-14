@@ -38,6 +38,7 @@ sign:
   extends: .tpl:container:sign:sign-image
   needs:
     - docker-build
+    - merge-manifest
 
 attest:
   extends: .tpl:container:sign:attest-image

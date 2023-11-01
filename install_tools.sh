@@ -141,6 +141,18 @@ mv "manifest-tool-${OS}-${ARCH}" "/usr/local/bin/manifest-tool"
 chmod 0755 /usr/local/bin/manifest-tool
 rm -rf /tmp/binaries-manifest-tool.tar.gz
 
+echo "Install grype"
+GRYPE_VERSION=$(curl -sL "https://api.github.com/repos/anchore/grype/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+curl -OL "https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}/grype_${GRYPE_VERSION}_${OS}_${ARCH}.deb"
+apt install "./grype_${GRYPE_VERSION}_${OS}_${ARCH}.deb"
+rm "./grype_${GRYPE_VERSION}_${OS}_${ARCH}.deb"
+
+echo "Install syft"
+SYFT_VERSION=$(curl -sL "https://api.github.com/repos/anchore/syft/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+curl -OL "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_${OS}_${ARCH}.deb"
+apt install "./syft_${SYFT_VERSION}_${OS}_${ARCH}.deb"
+rm "./syft_${SYFT_VERSION}_${OS}_${ARCH}.deb"
+
 echo "install testssl.sh"
 git clone --depth 1 https://github.com/drwetter/testssl.sh.git /usr/local/testssl.sh
 chmod 0755 /usr/local/testssl.sh

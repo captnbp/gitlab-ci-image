@@ -164,6 +164,12 @@ curl -sLO --fail --show-error "https://github.com/anchore/syft/releases/download
 apt install "./syft_${SYFT_VERSION}_${OS}_${ARCH}.deb"
 rm "./syft_${SYFT_VERSION}_${OS}_${ARCH}.deb"
 
+echo "Install yq"
+YQ_VERSION=$(curl -sL "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+curl -sLO --fail --show-error "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_${OS}_${ARCH}"
+mv "./yq_${OS}_${ARCH}" "/usr/local/bin/yq"
+chmod 0755 /usr/local/bin/yq
+
 echo "install testssl.sh"
 git clone --depth 1 https://github.com/drwetter/testssl.sh.git /usr/local/testssl.sh
 chmod 0755 /usr/local/testssl.sh

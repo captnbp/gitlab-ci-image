@@ -24,7 +24,7 @@ apt-get install -y --no-install-recommends skopeo htop netcat-openbsd uuid-runti
   docker-ce-cli docker-buildx-plugin docker-compose-plugin \
   shellcheck python3-pip python3-setuptools python3-ldap python3-docker python3-venv twine python3-psycopg2 gcc python3-dev \
   mongodb-org-tools mongodb-mongosh \
-  clamav-base
+  clamav-base clamav-daemon clamav-cvdupdate clamav-freshclam
 
 # https://wiki.debian.org/Locale#Manually
 sed -i "s/# en_US.UTF-8/en_US.UTF-8/" /etc/locale.gen 

@@ -9,7 +9,7 @@
 | Package | ID | Severity | Installed Version | Fixed Version | Title |
 | -------- | ---- | -------- | ---------------- | ------------ | ---- |
 {{- range .Vulnerabilities }}
-| `{{ escapeXML .PkgName }}{{- if .PkgPath -}}<br/>{{ escapeXML .PkgPath}}{{- end -}}` | [{{ escapeXML .VulnerabilityID }}]({{ escapeXML .PrimaryURL }}) | {{ escapeXML .Severity }} | {{ escapeXML .InstalledVersion }} | {{ escapeXML .FixedVersion }} | {{ escapeXML .Title }} |
+| `{{ escapeXML .PkgName }}{{- if .PkgPath -}}<br/>{{ escapeXML .PkgPath}}{{- end -}}` | [{{ escapeXML .VulnerabilityID }}]({{ escapeXML .PrimaryURL }}) | {{ escapeXML .Severity }} {{- if eq .Severity "HIGH" }}⚠️{{- end }}{{- if eq .Severity "CRITICAL" }}🚫{{- end }} | {{ escapeXML .InstalledVersion }} | {{ escapeXML .FixedVersion }} | {{ escapeXML .Title }} |
 {{- end }}
 
 {{- end }}

@@ -156,6 +156,11 @@ mv "manifest-tool-${OS}-${ARCH}" "/usr/local/bin/manifest-tool"
 chmod 0755 /usr/local/bin/manifest-tool
 rm -rf /tmp/binaries-manifest-tool.tar.gz
 
+echo "Install glab"
+curl -sLO --fail --show-error "https://gitlab.com/gitlab-org/cli/-/releases/v1.76.2/downloads/glab_1.76.2_${OS}_${ARCH}.deb"
+apt install "./glab_1.76.2_${OS}_${ARCH}.deb"
+rm "./glab_1.76.2_${OS}_${ARCH}.deb"
+
 echo "Install grype"
 GRYPE_VERSION=$(curl -sL "https://api.github.com/repos/anchore/grype/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
 curl -sLO --fail --show-error "https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}/grype_${GRYPE_VERSION}_${OS}_${ARCH}.deb"

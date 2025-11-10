@@ -1,57 +1,9 @@
-stages:
-  - test
-  - build
-  - scan
-  - sign
-
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_TAG
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
+---
 include:
   - project: doca/gitlab-ci-lib
     ref: main
-    file: container/build.yaml
-  - project: doca/gitlab-ci-lib
-    ref: main
-    file: container/sign.yaml
-  - project: doca/gitlab-ci-lib
-    ref: main
-    file: container/test.yaml
+    file: /pipelines/image-build.yaml
 
-lint-dockerfile:
-  extends: .tpl:container:test:hadolint
+variables:
+  IMAGE_NAME: "gitlab-ci-image"
 
-docker-build:
-  extends: .tpl:container:build:kaniko
-  needs:
-    - lint-dockerfile
-
-container_scanning:
-  extends: .tpl:container:test:cve
-  needs:
-    - docker-build
-
-sign:
-  extends: .tpl:container:sign:sign-image
-  needs:
-    - docker-build
-    - merge-manifest
-
-attest:
-  extends: .tpl:container:sign:attest-image
-  needs:
-    - docker-build
-
-mr-note:
-  extends: .tpl:container:test:mr-note
-  needs:
-    - docker-build
-
-merge-manifest:
-  extends: .tpl:container:build:merge_manifests
-  needs:
-    - job: docker-build
-      artifacts: false

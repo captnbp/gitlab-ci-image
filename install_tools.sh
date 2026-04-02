@@ -20,7 +20,7 @@ echo \
   $(source /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 apt-get update >/dev/null
-apt-get install -y --no-install-recommends skopeo htop netcat-openbsd uuid-runtime dnsutils exa fd-find trivy iproute2 nmap iperf3 \
+apt-get install -y --no-install-recommends skopeo htop netcat-openbsd uuid-runtime dnsutils eza fd-find trivy iproute2 nmap iperf3 \
   docker-ce-cli docker-buildx-plugin docker-compose-plugin \
   shellcheck python3-pip python3-setuptools python3-ldap python3-docker python3-venv twine python3-psycopg2 gcc python3-dev \
   mongodb-org-tools mongodb-mongosh \

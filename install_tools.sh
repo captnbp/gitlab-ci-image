@@ -36,11 +36,6 @@ locale-gen
 [ "$(uname -m)" = aarch64 ] && ARCH="arm64"
 OS=$(uname |tr '[:upper:]' '[:lower:]')
 
-echo "Install Ansible and ansible-modules-hashivault"
-# https://www.linuxuprising.com/2023/03/next-debianubuntu-releases-will-likely.html?m=1
-export PIP_BREAK_SYSTEM_PACKAGES=1
-pip3 install --no-cache-dir ansible ansible-modules-hashivault openshift passlib hvac elasticsearch virtualenv ipykernel checkov opensearch-py
-
 ln -s "$(which fdfind)" /usr/local/bin/fd
 
 echo "Install kubectl"

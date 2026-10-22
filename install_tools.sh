@@ -74,12 +74,6 @@ tar xf "$HELM_TMP_FILE" -C "$HELM_TMP"
 HELM_TMP_BIN="$HELM_TMP/$OS-$ARCH/helm"
 cp "$HELM_TMP_BIN" "/usr/local/bin"
 
-echo "Install Packer"
-PACKER_VERSION=$(curl -sL "https://api.github.com/repos/hashicorp/packer/releases/latest" | jq -r .tag_name | sed -E 's/v(.*)/\1/')
-curl -sL --fail --show-error "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_${OS}_${ARCH}.zip" -o /tmp/packer.zip
-unzip -o /tmp/packer.zip >/dev/null
-mv -f /tmp/packer /usr/local/bin/packer
-rm /tmp/packer.zip
 
 echo "Install Terraform"
 TERRAFORM_VERSION=$(curl -sL "https://api.github.com/repos/hashicorp/terraform/releases/latest" | jq -r .tag_name | sed -E 's/v(.*)/\1/')
@@ -191,7 +185,7 @@ rm "./${GO_VERSION}.${OS}-${ARCH}.tar.gz"
 
 echo "Install NodeJS and NPM"
 curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-NODE_MAJOR=20
+NODE_MAJOR=26
 echo "deb [arch=\"$(dpkg --print-architecture)\" signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 apt-get update
 apt-get install -y nodejs

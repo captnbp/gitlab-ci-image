@@ -79,7 +79,7 @@ jobs:
           docker buildx build \
             --platform ${{ env.PLATFORM }} \
             --tag ${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}:ci \
-            --output type=docker,dest=image.tar \
+            --output type=oci,dest=image.tar \
             .
 
       - name: Trivy vulnerability scan (CycloneDX report)

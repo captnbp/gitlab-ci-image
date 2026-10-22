@@ -6,4 +6,5 @@ include:
 
 variables:
   IMAGE_NAME: "gitlab-ci-image"
+  IMAGE_PATH: "./"
 

@@ -92,7 +92,7 @@ chown 0755 /usr/local/bin/vault
 rm /tmp/vault.zip
 
 echo "Install Minio mc client"
-curl -sL --fail --show-error "https://dl.min.io/client/mc/release/${OS}-${ARCH}/mc" -o /usr/local/bin/mc
+curl -sL --fail --show-error "https://dl.min.io/aistor/mc/release/${OS}-${ARCH}/mc" -o /usr/local/bin/mc
 chmod 0755 /usr/local/bin/mc
 
 echo "Install Restic cli"

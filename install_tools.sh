@@ -177,7 +177,7 @@ wget https://gitlab.com/gitlab-org/terraform-images/-/raw/master/src/bin/gitlab-
 chmod +x /usr/bin/gitlab-terraform
 
 echo "Install golang"
-GO_VERSION=$(curl -sL https://go.dev/VERSION\?m\=text | head -1)
+GO_VERSION=$(curl -sL "https://go.dev/VERSION?m=text" | head -1)
 curl -sLO --fail --show-error "https://go.dev/dl/${GO_VERSION}.${OS}-${ARCH}.tar.gz"
 rm -rf /usr/local/go && tar -C /usr/local -xzf "${GO_VERSION}.${OS}-${ARCH}.tar.gz"
 echo "export PATH=\$PATH:/usr/local/go/bin" >> /etc/profile

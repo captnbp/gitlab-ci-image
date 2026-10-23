@@ -53,17 +53,39 @@ jobs:
     name: Build & Scan
     needs: lint
     runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}
+          # main -> latest ; tag git -> <tagname> + latest
+          tags: |
+            type=raw,value=latest
+            type=ref,event=tag
+          flavor: |
+            latest=false
+
       - name: Build image (amd64)
+        env:
+          META_LABELS: ${{ steps.meta.outputs.labels }}
         run: |
           set -euo pipefail
           IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
+          LABEL_OPTS=()
+          while IFS= read -r LABEL; do
+            if [ -n "$LABEL" ]; then LABEL_OPTS+=(--label "$LABEL"); fi
+          done <<< "${META_LABELS}"
           docker buildx build \
             --platform ${{ env.PLATFORM }} \
             --tag "${IMAGE_REF}:${FORGEJO_SHA}" \
+            "${LABEL_OPTS[@]}" \
             --load \
             .
 
@@ -147,32 +169,29 @@ jobs:
 
       - name: Push image
         id: push
+        env:
+          META_TAGS: ${{ needs.build.outputs.tags }}
         run: |
           set -euo pipefail
           IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
           SHA_TAG="${FORGEJO_SHA}"
-          REF="${{ forgejo.ref }}"
-          if [[ "$REF" == refs/tags/* ]]; then
-            TAGS="${REF#refs/tags/} ${SHA_TAG} latest"
-          else
-            TAGS="${SHA_TAG} latest"
-          fi
           IMAGE_DIGEST=""
-          for TAG in $TAGS; do
-            docker tag "${IMAGE_REF}:${SHA_TAG}" "${IMAGE_REF}:${TAG}"
-            PUSH_OUTPUT=$(docker push "${IMAGE_REF}:${TAG}" 2>&1)
+          while IFS= read -r TAG; do
+            if [ -z "$TAG" ]; then continue; fi
+            docker tag "${IMAGE_REF}:${SHA_TAG}" "${TAG}"
+            PUSH_OUTPUT=$(docker push "${TAG}" 2>&1)
             echo "$PUSH_OUTPUT"
             if [ -z "$IMAGE_DIGEST" ]; then
               IMAGE_DIGEST=$(echo "$PUSH_OUTPUT" | grep -oE 'digest: sha256:[a-f0-9]{64}' | awk '{print $2}')
             fi
-          done
+          done <<< "${META_TAGS}"
           if [ -z "$IMAGE_DIGEST" ]; then
             echo "::error::Failed to retrieve image digest"
             exit 1
           fi
           echo "image_ref=${IMAGE_REF}" >> ${FORGEJO_OUTPUT}
           echo "image_digest=${IMAGE_DIGEST}" >> ${FORGEJO_OUTPUT}
-          echo "Pushed ${IMAGE_REF} (tags: ${TAGS// /,}) digest ${IMAGE_DIGEST}"
+          echo "Pushed ${IMAGE_REF} digest ${IMAGE_DIGEST}"
 
       - name: Install Trivy
         run: |

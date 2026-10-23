@@ -79,28 +79,23 @@ jobs:
           IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
           docker buildx build \
             --platform ${{ env.PLATFORM }} \
-            --tag "${IMAGE_REF}:ci" \
+            --tag "${IMAGE_REF}:${FORGEJO_SHA}" \
             --load \
             .
-          docker save --output image.tar "${IMAGE_REF}:ci"
 
       - name: Trivy vulnerability scan (CycloneDX report)
         run: |
           set -euo pipefail
-          trivy image --input image.tar --format cyclonedx --output scan-report.cdx.json
-          trivy image --input image.tar --format template --template "@trivy-markdown.tpl" --output scan-report.md
+          IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
+          trivy image "${IMAGE_REF}:${FORGEJO_SHA}" --format cyclonedx --output scan-report.cdx.json
+          trivy image "${IMAGE_REF}:${FORGEJO_SHA}" --format template --template "@trivy-markdown.tpl" --output scan-report.md
           echo "Scan finished, see the scan-reports artifact for scan-report.md"
 
       - name: Trivy SBOM (SPDX)
         run: |
           set -euo pipefail
-          trivy image --input image.tar --format spdx-json --output sbom.spdx.json
-
-      - name: Upload image artifact
-        uses: forgejo/upload-artifact@v4
-        with:
-          name: image
-          path: image.tar
+          IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
+          trivy image "${IMAGE_REF}:${FORGEJO_SHA}" --format spdx-json --output sbom.spdx.json
 
       - name: Upload scan reports artifact
         uses: forgejo/upload-artifact@v4
@@ -121,11 +116,6 @@ jobs:
       image_ref: ${{ steps.push.outputs.image_ref }}
       image_digest: ${{ steps.push.outputs.image_digest }}
     steps:
-      - name: Download image artifact
-        uses: forgejo/download-artifact@v7
-        with:
-          name: image
-
       - name: Install Vault
         run: |
           set -euo pipefail
@@ -196,16 +186,16 @@ jobs:
         run: |
           set -euo pipefail
           IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
+          SHA_TAG="${FORGEJO_SHA}"
           REF="${{ forgejo.ref }}"
           if [[ "$REF" == refs/tags/* ]]; then
-            TAGS="${REF#refs/tags/} latest"
+            TAGS="${REF#refs/tags/} ${SHA_TAG} latest"
           else
-            TAGS="latest"
+            TAGS="${SHA_TAG} latest"
           fi
-          docker load -i image.tar
           IMAGE_DIGEST=""
           for TAG in $TAGS; do
-            docker tag "${IMAGE_REF}:ci" "${IMAGE_REF}:${TAG}"
+            docker tag "${IMAGE_REF}:${SHA_TAG}" "${IMAGE_REF}:${TAG}"
             PUSH_OUTPUT=$(docker push "${IMAGE_REF}:${TAG}" 2>&1)
             echo "$PUSH_OUTPUT"
             if [ -z "$IMAGE_DIGEST" ]; then
@@ -353,3 +343,21 @@ jobs:
       - name: Logout on Failure
         if: failure()
         run: docker logout ${{ env.REGISTRY }}
+
+  cleanup:
+    name: Cleanup Docker engine
+    if: always()
+    needs: [ build, publish, sign ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove image from Docker engine
+        run: |
+          IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
+          IMAGE_IDS=$(docker images "${IMAGE_REF}" --format '{{.ID}}' | sort -u)
+          if [ -n "$IMAGE_IDS" ]; then
+            for IMAGE_ID in $IMAGE_IDS; do
+              docker image rm -f "${IMAGE_ID}" || true
+            done
+          else
+            echo "No image to clean"
+          fi

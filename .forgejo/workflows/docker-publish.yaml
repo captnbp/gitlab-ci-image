@@ -57,22 +57,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install Trivy
-        run: |
-          set -euo pipefail
-          if command -v trivy >/dev/null 2>&1; then exit 0; fi
-          SUDO=""
-          if command -v sudo >/dev/null 2>&1; then SUDO="sudo"; fi
-          TRIVY_VERSION=$(curl -sL https://api.github.com/repos/aquasecurity/trivy/releases/latest | jq -r .tag_name | sed -E 's/v(.*)/\1/')
-          case "$(uname -m)" in
-            x86_64) TRIVY_ARCH="64bit" ;;
-            aarch64) TRIVY_ARCH="ARM64" ;;
-          esac
-          curl -sL --fail --show-error "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-${TRIVY_ARCH}.tar.gz" -o /tmp/trivy.tar.gz
-          tar -zxf /tmp/trivy.tar.gz -C /tmp trivy
-          $SUDO mv /tmp/trivy /usr/local/bin/trivy
-          rm /tmp/trivy.tar.gz
-
       - name: Build image (amd64)
         run: |
           set -euo pipefail
@@ -82,30 +66,6 @@ jobs:
             --tag "${IMAGE_REF}:${FORGEJO_SHA}" \
             --load \
             .
-          docker save --output "image-${FORGEJO_SHA}.tar" "${IMAGE_REF}:${FORGEJO_SHA}"
-
-      - name: Trivy vulnerability scan (CycloneDX report)
-        run: |
-          set -euo pipefail
-          IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
-          trivy image "image-${FORGEJO_SHA}.tar" --format cyclonedx --output scan-report.cdx.json
-          trivy image "image-${FORGEJO_SHA}.tar" --format template --template "@trivy-markdown.tpl" --output scan-report.md
-          echo "Scan finished, see the scan-reports artifact for scan-report.md"
-
-      - name: Trivy SBOM (SPDX)
-        run: |
-          set -euo pipefail
-          IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
-          trivy image "image-${FORGEJO_SHA}.tar" --format spdx-json --output sbom.spdx.json
-
-      - name: Upload scan reports artifact
-        uses: forgejo/upload-artifact@v4
-        with:
-          name: scan-reports
-          path: |
-            scan-report.cdx.json
-            scan-report.md
-            sbom.spdx.json
 
   publish:
     name: Publish to OCI
@@ -117,6 +77,9 @@ jobs:
       image_ref: ${{ steps.push.outputs.image_ref }}
       image_digest: ${{ steps.push.outputs.image_digest }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
       - name: Install Vault
         run: |
           set -euo pipefail
@@ -210,6 +173,46 @@ jobs:
           echo "image_ref=${IMAGE_REF}" >> ${FORGEJO_OUTPUT}
           echo "image_digest=${IMAGE_DIGEST}" >> ${FORGEJO_OUTPUT}
           echo "Pushed ${IMAGE_REF} (tags: ${TAGS// /,}) digest ${IMAGE_DIGEST}"
+
+      - name: Install Trivy
+        run: |
+          set -euo pipefail
+          if command -v trivy >/dev/null 2>&1; then exit 0; fi
+          SUDO=""
+          if command -v sudo >/dev/null 2>&1; then SUDO="sudo"; fi
+          TRIVY_VERSION=$(curl -sL https://api.github.com/repos/aquasecurity/trivy/releases/latest | jq -r .tag_name | sed -E 's/v(.*)/\1/')
+          case "$(uname -m)" in
+            x86_64) TRIVY_ARCH="64bit" ;;
+            aarch64) TRIVY_ARCH="ARM64" ;;
+          esac
+          curl -sL --fail --show-error "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-${TRIVY_ARCH}.tar.gz" -o /tmp/trivy.tar.gz
+          tar -zxf /tmp/trivy.tar.gz -C /tmp trivy
+          $SUDO mv /tmp/trivy /usr/local/bin/trivy
+          rm /tmp/trivy.tar.gz
+
+      - name: Trivy vulnerability scan (CycloneDX report)
+        run: |
+          set -euo pipefail
+          IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
+          IMAGE_DIGEST="${{ steps.push.outputs.image_digest }}"
+          trivy image --image-src remote "${IMAGE_REF}@${IMAGE_DIGEST}" --format json --output trivy-report.json
+          trivy convert --format cyclonedx --output scan-report.cdx.json trivy-report.json
+          trivy convert --format template --template "@trivy-markdown.tpl" --output scan-report.md trivy-report.json
+          echo "Scan finished, see the scan-reports artifact for scan-report.md"
+
+      - name: Trivy SBOM (SPDX)
+        run: |
+          set -euo pipefail
+          trivy convert --format spdx-json --output sbom.spdx.json trivy-report.json
+
+      - name: Upload scan reports artifact
+        uses: forgejo/upload-artifact@v4
+        with:
+          name: scan-reports
+          path: |
+            scan-report.cdx.json
+            scan-report.md
+            sbom.spdx.json
 
       - name: Logout on Success
         run: docker logout ${{ env.REGISTRY }}
@@ -358,7 +361,6 @@ jobs:
           if [ -n "$IMAGE_IDS" ]; then
             for IMAGE_ID in $IMAGE_IDS; do
               docker image rm -f "${IMAGE_ID}" || true
-              rm -f "image-${FORGEJO_SHA}.tar" || true
             done
           else
             echo "No image to clean"

@@ -82,20 +82,21 @@ jobs:
             --tag "${IMAGE_REF}:${FORGEJO_SHA}" \
             --load \
             .
+          docker save --output "image-${FORGEJO_SHA}.tar" "${IMAGE_REF}:${FORGEJO_SHA}"
 
       - name: Trivy vulnerability scan (CycloneDX report)
         run: |
           set -euo pipefail
           IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
-          trivy image "${IMAGE_REF}:${FORGEJO_SHA}" --format cyclonedx --output scan-report.cdx.json
-          trivy image "${IMAGE_REF}:${FORGEJO_SHA}" --format template --template "@trivy-markdown.tpl" --output scan-report.md
+          trivy image "image-${FORGEJO_SHA}.tar" --format cyclonedx --output scan-report.cdx.json
+          trivy image "image-${FORGEJO_SHA}.tar" --format template --template "@trivy-markdown.tpl" --output scan-report.md
           echo "Scan finished, see the scan-reports artifact for scan-report.md"
 
       - name: Trivy SBOM (SPDX)
         run: |
           set -euo pipefail
           IMAGE_REF="${{ env.REGISTRY }}/${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}"
-          trivy image "${IMAGE_REF}:${FORGEJO_SHA}" --format spdx-json --output sbom.spdx.json
+          trivy image "image-${FORGEJO_SHA}.tar" --format spdx-json --output sbom.spdx.json
 
       - name: Upload scan reports artifact
         uses: forgejo/upload-artifact@v4
@@ -357,6 +358,7 @@ jobs:
           if [ -n "$IMAGE_IDS" ]; then
             for IMAGE_ID in $IMAGE_IDS; do
               docker image rm -f "${IMAGE_ID}" || true
+              rm -f "image-${FORGEJO_SHA}.tar" || true
             done
           else
             echo "No image to clean"
